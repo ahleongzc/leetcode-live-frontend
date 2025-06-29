@@ -38,6 +38,8 @@
     "@radix-ui/react-toggle-group": "^1.1.10",
     "@radix-ui/react-tooltip": "^1.2.7",
     "@tailwindcss/vite": "^4.1.11",
+    "@types/chrome": "^0.0.328",
+    "axios": "^1.10.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -56,10 +58,12 @@
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.11",
     "vaul": "^1.1.2",
+    "vite-plugin-static-copy": "^3.1.0",
     "zod": "^3.25.67"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
+    "@types/dom-speech-recognition": "^0.0.6",
     "@types/node": "^24.0.7",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
