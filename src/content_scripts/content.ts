@@ -5,8 +5,8 @@ let recognition: null | SpeechRecognition = null
 
 chrome.runtime.onMessage.addListener(
     async (message: Message) => {
-        switch (message.Command) {
-            case "startSession":
+        switch (message.Type) {
+            case "login":
                 WebSocketSingleton.getInstance().connect("ws://localhost:8080/v1/start-interview", {
                     "question_id": "12312312",
                     "session_id": "MjrXR0ZMIC_M1whAzQrwTC2ZoysWYyJIMZnQl0YijEc",
@@ -17,7 +17,7 @@ chrome.runtime.onMessage.addListener(
                     recognition.start()
                 }
                 break
-            case "endSession":
+            case "interview":
                 WebSocketSingleton.getInstance().closeSocket()
                 if (recognition) {
                     recognition.stop()
