@@ -1,7 +1,9 @@
 export type Command = "startSession" | "endSession" | "playAudio" | "login" | "logout" | "isLoggedIn" | "debug"
-
+export type Type = "auth"
 export interface Message {
-    Command: Command
+    Type: Type
+    Email?: string
+    Password?: string
     Message?: string
 }
 
