@@ -13,8 +13,8 @@ chrome.runtime.onMessage.addListener((message: Message, _, sendResponse) => {
 				break
 			case "login":
 				if (!message.email || !message.password) {
-					sendResponse({ error: "Email and password are required" });
-					return true
+					sendResponse(HTTP_STATUS.BAD_REQUEST)
+					return
 				}
 				const loginRequest: LoginRequest = {
 					email: message.email,
@@ -39,7 +39,7 @@ chrome.runtime.onMessage.addListener((message: Message, _, sendResponse) => {
 						const response = await authAPIs.authStatus(result.sessionID)
 						sendResponse(response.status)
 					} catch (error) {
-						sendResponse(error)
+						sendResponse(handleAxiosError(error))
 					}
 				})
 				break
