@@ -1,36 +1,62 @@
+import type { SetUpInterviewRequestBody } from "@/api/interview-api";
 import type { Message, MessageReq } from "../types"
 import WebSocketSingleton from "../websocket";
 
 let recognition: null | SpeechRecognition = null
 
-chrome.runtime.onMessage.addListener(
-    async (message: Message) => {
+chrome.runtime.onMessage.addListener((message: Message) => {
+    (async () => {
         switch (message.Type) {
-            case "login":
-                WebSocketSingleton.getInstance().connect("ws://localhost:8080/v1/start-interview", {
-                    "question_id": "12312312",
-                    "session_id": "MjrXR0ZMIC_M1whAzQrwTC2ZoysWYyJIMZnQl0YijEc",
+            case "setUpInterviewDOM":
+                const meta = document.querySelector('meta[name="description"]');
+                const description = meta?.getAttribute('content') || "";
+
+                const ogTitleMeta = document.querySelector('meta[property="og:title"]');
+                const questionID = ogTitleMeta?.getAttribute('content') || "";
+                
+
+                const req: SetUpInterviewRequestBody = {
+                    description: description,
+                    question_id: questionID,
+                }
+
+                if (!message.SessionID) {
+                    return
+                }
+
+                fetch("http://localhost:8000/v1/interview/set-up", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Session-ID": message.SessionID // or use your sessionIDHeader constant
+                    },
+                    body: JSON.stringify(req)
                 })
-                const socket = WebSocketSingleton.getInstance().getSocket()
-                recognition = startSpeechRecognition(socket)
-                if (recognition) {
-                    recognition.start()
-                }
-                break
-            case "interview":
-                WebSocketSingleton.getInstance().closeSocket()
-                if (recognition) {
-                    recognition.stop()
-                    recognition = null
-                }
+                    .then(response => response.json())
+                    .then(data => {
+                        WebSocketSingleton.getInstance().connect("ws://localhost:8000/v1/interview/join", {
+                            token: data.token
+                        })
+                        const socket = WebSocketSingleton.getInstance().getSocket()
+                        recognition = startSpeechRecognition(socket)
+                        if (recognition) {
+                            recognition.start()
+                        }
+                    })
+
+
+                console.log(req)
                 break
             case "debug":
                 console.log(message)
                 break
+            default:
+                break
         }
-    }
-);
+    })()
 
+    return true
+});
 
 
 // Start speech recognition and stream to WebSocket

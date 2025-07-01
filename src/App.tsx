@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from './pages/login-page'
-import StartInterviewPage from "./pages/start-interview-page";
+import DashboardPage from "./pages/dashboard-page";
 import { Toaster } from "@/components/ui/sonner"
 
 function App() {
@@ -12,7 +12,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<LoginPage />} />
-          <Route path="/start-interview" element={<StartInterviewPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="*" element={<LoginPage />} />
         </Routes>
       </Router>

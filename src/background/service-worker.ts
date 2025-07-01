@@ -1,47 +1,42 @@
-import authAPIs from "@/api/auth-api";
-import { HTTP_STATUS, sessionID, type LoginRequest, type Message } from "../types";
-import { handleAxiosError } from "@/api/axios-instance";
+import { sessionID, type Message } from "../types";
 
 chrome.runtime.onMessage.addListener((message: Message, _, sendResponse) => {
 	(async () => {
 		switch (message.Type) {
+			case "setUpInterview":
+				chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+					if (tabs.length === 0 || tabs[0].id === undefined) return;
+
+					chrome.storage.local.get("sessionID", async (result) => {
+						const msg: Message = {
+							Type: "setUpInterviewDOM",
+							SessionID: result.sessionID
+						}
+
+						chrome.tabs.sendMessage(tabs[0].id as number, msg)
+					});
+				})
+				break
 			case "debug":
 				chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 					if (tabs.length === 0 || tabs[0].id === undefined) return;
 					chrome.tabs.sendMessage(tabs[0].id, message);
 				})
 				break
-			case "login":
-				if (!message.email || !message.password) {
-					sendResponse(HTTP_STATUS.BAD_REQUEST)
-					return
-				}
-				const loginRequest: LoginRequest = {
-					email: message.email,
-					password: message.password,
-				};
-				try {
-					const response = await authAPIs.login(loginRequest)
-					chrome.storage.local.set({ [sessionID]: response.data.session_id }, function () {
-						sendResponse(HTTP_STATUS.OK)
-					});
-				} catch (error) {
-					sendResponse(handleAxiosError(error))
-				}
+			case "storeSessionID":
+				chrome.storage.local.set({ [sessionID]: message.Content }, function () {
+					if (chrome.runtime.lastError) {
+						sendResponse({ error: chrome.runtime.lastError.message });
+						return;
+					}
+					sendResponse();
+				});
 				break
-
-			case "validate":
-				chrome.storage.local.get([sessionID], async (result) => {
-					if (result.sessionID === undefined) {
-						return
-					}
-					try {
-						const response = await authAPIs.authStatus(result.sessionID)
-						sendResponse(response.status)
-					} catch (error) {
-						sendResponse(handleAxiosError(error))
-					}
-				})
+			case "getSessionID":
+				chrome.storage.local.get("sessionID", (result) => {
+					const res = result.sessionID;
+					sendResponse({ sessionID: res })
+				});
 				break
 		}
 	})()

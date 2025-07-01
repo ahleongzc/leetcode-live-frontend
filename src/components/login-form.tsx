@@ -9,60 +9,81 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import type { Message } from "../types"
 import { useEffect, useState } from "react"
-import { HTTP_STATUS } from "../types"
 import { toast } from "sonner"
-import { useNavigate } from "react-router-dom";
+
+import authAPIs from "@/api/auth-api"
+import type { LoginRequest, LoginResponse } from "@/api/auth-api"
+import type { Message } from "@/types"
+import { sendChromeMessage } from "@/common"
+import { useNavigate } from "react-router-dom"
 
 export function LoginForm() {
     const navigate = useNavigate()
 
-    const [email, setEmail] = useState<string>("")
-    const [password, setPassword] = useState<string>("")
+    const [email, setEmail] = useState<string>("zhecheng555@gmail.com")
+    const [password, setPassword] = useState<string>("zhecheng555")
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        const loginCredentials: Message = {
-            Type: "login",
+        const req: LoginRequest = {
             email: email,
             password: password
         }
 
-        chrome.runtime.sendMessage(loginCredentials, (response) => {
-            if (response == HTTP_STATUS.UNAUTHORIZED) {
-                toast("Login Failed", {
-                    description: "Invalid credentials",
-                    action: {
-                        label: "OK",
-                        onClick: () => { },
-                    },
-                })
-                return
+        try {
+            const res: LoginResponse = await authAPIs.login(req)
+            const message: Message = {
+                Type: "storeSessionID",
+                Content: res.sessionID
             }
-            if (response == HTTP_STATUS.OK) {
-                navigate("/start-interview")
-            }
-        })
+            await sendChromeMessage(message)
+            navigate("/dashboard")
+        } catch (error: any) {
+            toast("Login Failed", {
+                description: error.response?.data?.error || "Something went wrong, please try again",
+                action: {
+                    label: "OK",
+                    onClick: () => { },
+                },
+            })
+            return
+        }
     }
 
     useEffect(() => {
-        chrome.runtime.sendMessage({ Type: "validate" }, (response) => {
-            if (response === HTTP_STATUS.UNAUTHORIZED) {
-                toast("Login Failed", {
-                    description: "Invalid credentials",
+        const checkSession = async () => {
+            const message: Message = { Type: "getSessionID" };
+            try {
+                const response = await sendChromeMessage(message);
+                const sessionID = response?.sessionID;
+                if (sessionID == "") {
+                    return;
+                }
+                try {
+                    await authAPIs.authStatus(sessionID);
+                    navigate("/dashboard")
+                } catch (error: any) {
+                    toast("Session Expired", {
+                        description: error.response?.data?.error || "Something went wrong, please try again",
+                        action: {
+                            label: "OK",
+                            onClick: () => { },
+                        },
+                    });
+                }
+            } catch (error: any) {
+                toast("Session Expired", {
+                    description: error.response?.data?.error || "Something went wrong, please try again",
                     action: {
                         label: "OK",
                         onClick: () => { },
                     },
-                })
-                return
+                });
             }
+        };
 
-            if (response === HTTP_STATUS.OK) {
-                navigate("/start-interview")
-            }
-        })
+        checkSession()
     }, [])
 
     return (
