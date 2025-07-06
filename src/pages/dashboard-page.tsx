@@ -1,10 +1,12 @@
 import { sendChromeMessage } from "@/common"
 import type { Message } from "../types"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner"
 
 export default function DashboardPage() {
-    const [err, setErr] = useState("")
+    const navigate = useNavigate();
+
     const handleDebug = (e: React.FormEvent) => {
         e.preventDefault()
         const debug: Message = {
@@ -20,11 +22,31 @@ export default function DashboardPage() {
             Type: "setUpInterview"
         }
         try {
-            await sendChromeMessage(message)
+            const response = await sendChromeMessage(message)
+            if (response.error) {
+                toast("Interview Setup Failed", {
+                    description: response.error,
+                    action: {
+                        label: "OK",
+                        onClick: () => { },
+                    },
+                });
+            }
         } catch (error: any) {
-            setErr(JSON.stringify(error))
+            toast("Internal Server Error", {
+                description: error.error || "Something went wrong, please try again",
+                action: {
+                    label: "OK",
+                    onClick: () => { },
+                },
+            })
         }
     }
+
+    const handleGoToHistory = () => {
+        navigate("/history"); // Navigate to the history page
+    };
+
 
     return (
         <div className="flex flex-col items-center justify-center h-full w-full">
@@ -35,15 +57,19 @@ export default function DashboardPage() {
             >
                 DEBUG
             </Button>
-            <a className="text-2xl">
-                {err}
-            </a>
             <Button
                 type="submit"
                 className="bg-white w-full max-w-sm mx-auto transform transition-transform duration-200 active:scale-95 hover:bg-gray-200"
                 onClick={handleStartInterview}
             >
                 Start Interview
+            </Button>
+            <Button
+                type="button"
+                className="bg-blue-500 text-white w-full max-w-sm mx-auto transform transition-transform duration-200 active:scale-95 hover:bg-blue-600"
+                onClick={handleGoToHistory}
+            >
+                Go to History
             </Button>
         </div>
     )

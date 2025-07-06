@@ -48,10 +48,14 @@ class WebSocketSingleton {
         const urlWithParams = `${host}${queryString}`;
         this.socket = new WebSocket(urlWithParams);
 
+        this.socket.onclose = async (event) => {
+            console.log(event)
+        }
+
         this.socket.onmessage = async (message) => {
             try {
                 const data = JSON.parse(message.data)
-                await AudioPlayerSingleton.getInstance().play(data.content)
+                await AudioPlayerSingleton.getInstance().play(data.url)
             } catch (error) {
                 console.log(error)
             }

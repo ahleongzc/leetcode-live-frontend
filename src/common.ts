@@ -5,8 +5,6 @@ export function sendChromeMessage<T = any>(message: Message): Promise<T> {
         chrome.runtime.sendMessage(message, (response) => {
             if (chrome.runtime.lastError) {
                 reject(new Error(chrome.runtime.lastError.message))
-            } else if (response?.error) {
-                reject(new Error(response.error))
             } else {
                 resolve(response)
             }

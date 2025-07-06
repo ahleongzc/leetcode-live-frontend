@@ -13,16 +13,16 @@ import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import authAPIs from "@/api/auth-api"
-import type { LoginRequest, LoginResponse } from "@/api/auth-api"
-import type { Message } from "@/types"
+import type { LoginRequest } from "@/api/auth-api"
+import { sessionTokenHeader, type Message } from "@/types"
 import { sendChromeMessage } from "@/common"
 import { useNavigate } from "react-router-dom"
 
 export function LoginForm() {
     const navigate = useNavigate()
 
-    const [email, setEmail] = useState<string>("zhecheng555@gmail.com")
-    const [password, setPassword] = useState<string>("zhecheng555")
+    const [email, setEmail] = useState<string>("123@gmail.com")
+    const [password, setPassword] = useState<string>("123456789")
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -32,10 +32,11 @@ export function LoginForm() {
         }
 
         try {
-            const res: LoginResponse = await authAPIs.login(req)
+            const res = await authAPIs.login(req)
+            const sessionToken = String(res.headers[sessionTokenHeader])
             const message: Message = {
-                Type: "storeSessionID",
-                Content: res.sessionID
+                Type: "storeSessionToken",
+                Content: sessionToken
             }
             await sendChromeMessage(message)
             navigate("/dashboard")
@@ -53,15 +54,15 @@ export function LoginForm() {
 
     useEffect(() => {
         const checkSession = async () => {
-            const message: Message = { Type: "getSessionID" };
+            const message: Message = { Type: "getSessionToken" };
             try {
                 const response = await sendChromeMessage(message);
-                const sessionID = response?.sessionID;
-                if (sessionID == "") {
+                const sessionToken = response?.sessionToken;
+                if (sessionToken == "") {
                     return;
                 }
                 try {
-                    await authAPIs.authStatus(sessionID);
+                    await authAPIs.authStatus(sessionToken);
                     navigate("/dashboard")
                 } catch (error: any) {
                     toast("Session Expired", {

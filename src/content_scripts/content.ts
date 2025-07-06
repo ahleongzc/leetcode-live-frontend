@@ -13,37 +13,65 @@ chrome.runtime.onMessage.addListener((message: Message) => {
 
                 const ogTitleMeta = document.querySelector('meta[property="og:title"]');
                 const questionID = ogTitleMeta?.getAttribute('content') || "";
-                
 
                 const req: SetUpInterviewRequestBody = {
                     description: description,
                     question_id: questionID,
                 }
 
-                if (!message.SessionID) {
+                if (!message.SessionToken) {
                     return
                 }
 
-                fetch("http://localhost:8000/v1/interview/set-up", {
+                const response = await fetch("http://localhost:8000/v1/interview/set-up", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "X-Session-ID": message.SessionID // or use your sessionIDHeader constant
+                        "X-Session-Token": message.SessionToken
                     },
                     body: JSON.stringify(req)
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        WebSocketSingleton.getInstance().connect("ws://localhost:8000/v1/interview/join", {
-                            token: data.token
-                        })
-                        const socket = WebSocketSingleton.getInstance().getSocket()
-                        recognition = startSpeechRecognition(socket)
-                        if (recognition) {
-                            recognition.start()
-                        }
-                    })
 
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => null)
+                    const errorMessage = errorData?.error || `Server error: ${response.status}`
+                    chrome.runtime.sendMessage({
+                        Type: "errorDOM",
+                        error: errorMessage
+                    });
+                    return;
+                }
+
+                const interviewToken = response.headers.get("X-Interview-Token");
+                if (interviewToken == undefined) {
+                    chrome.runtime.sendMessage({
+                        Type: "errorDOM",
+                        error: "please try again"
+                    });
+                    return
+                }
+
+                try {
+                    WebSocketSingleton.getInstance().connect("ws://localhost:8000/v1/interview/join", {
+                        token: interviewToken,
+                    });
+
+                    const socket = WebSocketSingleton.getInstance().getSocket();
+                    if (!socket) {
+                        throw new Error("Failed to get WebSocket instance");
+                    }
+
+                    // 7. Initialize speech recognition
+                    recognition = startSpeechRecognition(socket);
+                    if (recognition) {
+                        recognition.start();
+                        console.log("Speech recognition started");
+                    } else {
+                        console.warn("Speech recognition not supported");
+                    }
+                } catch (wsError) {
+                    console.error("WebSocket setup failed:", wsError);
+                }
 
                 console.log(req)
                 break
@@ -75,11 +103,11 @@ const startSpeechRecognition = (socket: WebSocket | null): SpeechRecognition | n
     recognition.lang = "en-US";
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
-        const transcript = event.results[event.results.length - 1][0].transcript;
+        const chunk = event.results[event.results.length - 1][0].transcript;
         if (socket && socket.readyState === WebSocket.OPEN) {
             const payload: MessageReq = {
-                type: "transcript",
-                content: transcript
+                from: "client",
+                chunk: chunk
             }
             socket.send(JSON.stringify(payload));
             console.log(JSON.stringify(payload))
