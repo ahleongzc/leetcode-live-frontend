@@ -1,6 +1,6 @@
-export type Type = "storeSessionToken" | "debug" | "getSessionToken" | "setUpInterview" | "setUpInterviewDOM" | "errorDOM"
+export type Type = "storeSessionToken" | "debug" | "getSessionToken" | "setUpInterview" | "setUpInterviewDOM" | "errorDOM" | "unauthorized"
 
-export const sessionToken = "sessionToken"
+export const LOCAL_STORAGE_SESSION_TOKEN_KEY = "sessionToken"
 export const sessionTokenHeader = "x-session-token"
 
 export interface Message {

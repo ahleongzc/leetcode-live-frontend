@@ -17,6 +17,13 @@ const authAPIs = {
                 [sessionTokenHeader]: sessionToken
             }
         })
+    },
+    logout: async (sessionToken: string) => {
+        await axiosInstance.post("/v1/auth/logout"), {}, {
+            headers: {
+                [sessionTokenHeader]: sessionToken
+            }
+        }
     }
 }
 

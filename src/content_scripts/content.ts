@@ -32,6 +32,13 @@ chrome.runtime.onMessage.addListener((message: Message) => {
                     body: JSON.stringify(req)
                 })
 
+                if (response.status === 401) {
+                    chrome.runtime.sendMessage({
+                        Type: "unauthorized"
+                    });
+                    return;
+                }
+
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => null)
                     const errorMessage = errorData?.error || `Server error: ${response.status}`

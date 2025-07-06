@@ -49,6 +49,7 @@ class WebSocketSingleton {
         this.socket = new WebSocket(urlWithParams);
 
         this.socket.onclose = async (event) => {
+
             console.log(event)
         }
 

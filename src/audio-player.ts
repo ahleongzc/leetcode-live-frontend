@@ -14,8 +14,6 @@ class AudioPlayerSingleton {
 
     public async play(src: string): Promise<void> {
         if (this.isPlaying && this.audio && !this.audio.paused && !this.audio.ended) {
-            // Already playing, do not start another
-            console.log("Audio is already playing");
             return;
         }
         if (this.audio) {

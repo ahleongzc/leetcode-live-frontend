@@ -14,8 +14,7 @@ import { toast } from "sonner"
 
 import authAPIs from "@/api/auth-api"
 import type { LoginRequest } from "@/api/auth-api"
-import { sessionTokenHeader, type Message } from "@/types"
-import { sendChromeMessage } from "@/common"
+import { LOCAL_STORAGE_SESSION_TOKEN_KEY, sessionTokenHeader } from "@/types"
 import { useNavigate } from "react-router-dom"
 
 export function LoginForm() {
@@ -33,13 +32,9 @@ export function LoginForm() {
 
         try {
             const res = await authAPIs.login(req)
-            const sessionToken = String(res.headers[sessionTokenHeader])
-            const message: Message = {
-                Type: "storeSessionToken",
-                Content: sessionToken
-            }
-            await sendChromeMessage(message)
-            navigate("/dashboard")
+            const sessionToken = res.headers[sessionTokenHeader]
+            chrome.storage.local.set({ [LOCAL_STORAGE_SESSION_TOKEN_KEY]: sessionToken })
+            navigate("/home")
         } catch (error: any) {
             toast("Login Failed", {
                 description: error.response?.data?.error || "Something went wrong, please try again",
@@ -54,25 +49,11 @@ export function LoginForm() {
 
     useEffect(() => {
         const checkSession = async () => {
-            const message: Message = { Type: "getSessionToken" };
             try {
-                const response = await sendChromeMessage(message);
-                const sessionToken = response?.sessionToken;
-                if (sessionToken == "") {
-                    return;
-                }
-                try {
-                    await authAPIs.authStatus(sessionToken);
-                    navigate("/dashboard")
-                } catch (error: any) {
-                    toast("Session Expired", {
-                        description: error.response?.data?.error || "Something went wrong, please try again",
-                        action: {
-                            label: "OK",
-                            onClick: () => { },
-                        },
-                    });
-                }
+                const result = await chrome.storage.local.get(LOCAL_STORAGE_SESSION_TOKEN_KEY)
+                const sessionToken = result[LOCAL_STORAGE_SESSION_TOKEN_KEY]
+                await authAPIs.authStatus(sessionToken);
+                navigate("/home");
             } catch (error: any) {
                 toast("Session Expired", {
                     description: error.response?.data?.error || "Something went wrong, please try again",

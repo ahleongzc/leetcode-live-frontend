@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner"
 
-export default function DashboardPage() {
+export default function HomePage() {
     const navigate = useNavigate();
 
     const handleDebug = (e: React.FormEvent) => {
@@ -23,6 +23,11 @@ export default function DashboardPage() {
         }
         try {
             const response = await sendChromeMessage(message)
+            if (response?.unauthorized) {
+                navigate("/login");
+                return;
+            }
+
             if (response.error) {
                 toast("Interview Setup Failed", {
                     description: response.error,
