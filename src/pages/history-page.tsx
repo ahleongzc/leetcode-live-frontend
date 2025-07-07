@@ -4,7 +4,6 @@ import { InterviewCard } from "@/components/interview-card"
 import { useQuery } from "@tanstack/react-query"
 import { storage } from "@/storage";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { LOCAL_STORAGE_SESSION_TOKEN_KEY } from "@/types";
 
 export default function HistoryPage() {
     const {
@@ -15,7 +14,7 @@ export default function HistoryPage() {
     } = useQuery({
         queryKey: ['interview-history'],
         queryFn: async (): Promise<Interview[]> => {
-            const sessionToken = await storage.get(LOCAL_STORAGE_SESSION_TOKEN_KEY);
+            const sessionToken = await storage.getSessionToken()
             const responseBody = await interviewAPIs.interviewHistoryData(0, 0, sessionToken);
             return responseBody.data.interviews;
         },

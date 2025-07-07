@@ -8,25 +8,24 @@ export interface LoginRequest {
 
 const authAPIs = {
     login: async (email: string, password: string) => {
-        const res = await axiosInstance.post("/v1/auth/login", {
+        return await axiosInstance.post("/v1/auth/login", {
             email: email,
             password: password
         })
-        return res
     },
     authStatus: async (sessionToken: string) => {
-        await axiosInstance.post("/v1/auth/status", {}, {
+        return await axiosInstance.post("/v1/auth/status", {}, {
             headers: {
                 [SESSION_TOKEN_HEADER]: sessionToken
             }
         })
     },
     logout: async (sessionToken: string) => {
-        await axiosInstance.post("/v1/auth/logout"), {}, {
+        return await axiosInstance.post("/v1/auth/logout", {}, {  // Fixed: removed extra ),
             headers: {
                 [SESSION_TOKEN_HEADER]: sessionToken
             }
-        }
+        })
     }
 }
 
