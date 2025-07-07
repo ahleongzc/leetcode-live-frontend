@@ -12,15 +12,16 @@ export default function HistoryPage() {
         isError,
         error
     } = useQuery({
-        queryKey: ['interview-history'],
+        queryKey: ['interviewHistory'],
         queryFn: async (): Promise<Interview[]> => {
             const sessionToken = await storage.getSessionToken()
             const responseBody = await interviewAPIs.interviewHistoryData(0, 0, sessionToken);
             return responseBody.data.interviews;
         },
         staleTime: 5 * 60 * 1000,
+        refetchOnMount: true,
         refetchOnWindowFocus: false,
-        retry: false
+        retry: 3
     })
 
     if (isLoading) {

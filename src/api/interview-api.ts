@@ -9,7 +9,7 @@ export interface SetUpInterviewRequestBody {
 const interviewAPIs = {
     joinInterview: async (reqBody: SetUpInterviewRequestBody, sessionToken: string) => {
         try {
-            axiosInstance.post("/v1/interview/set-up-interview", reqBody, {
+            axiosInstance.post("/v1/interview/set-up-new", reqBody, {
                 headers: {
                     [SESSION_TOKEN_HEADER]: sessionToken
                 }
@@ -24,6 +24,14 @@ const interviewAPIs = {
     interviewHistoryData: async (limit: number, offset: number, sessionToken: string) => {
         const response = await axiosInstance.get(`/v1/interview/history`, {
             params: { limit, offset },
+            headers: {
+                [SESSION_TOKEN_HEADER]: sessionToken
+            }
+        });
+        return response.data
+    },
+    ongoingInterviewData: async (sessionToken: string) => {
+        const response = await axiosInstance.get(`/v1/interview/ongoing`, {
             headers: {
                 [SESSION_TOKEN_HEADER]: sessionToken
             }
