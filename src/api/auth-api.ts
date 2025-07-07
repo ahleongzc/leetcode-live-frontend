@@ -1,4 +1,4 @@
-import { sessionTokenHeader } from "@/types";
+import { SESSION_TOKEN_HEADER } from "@/types";
 import { axiosInstance } from "./axios-instance";
 
 export interface LoginRequest {
@@ -7,21 +7,24 @@ export interface LoginRequest {
 }
 
 const authAPIs = {
-    login: async (data: LoginRequest) => {
-        const res = await axiosInstance.post("/v1/auth/login", data)
+    login: async (email: string, password: string) => {
+        const res = await axiosInstance.post("/v1/auth/login", {
+            email: email,
+            password: password
+        })
         return res
     },
     authStatus: async (sessionToken: string) => {
         await axiosInstance.post("/v1/auth/status", {}, {
             headers: {
-                [sessionTokenHeader]: sessionToken
+                [SESSION_TOKEN_HEADER]: sessionToken
             }
         })
     },
     logout: async (sessionToken: string) => {
         await axiosInstance.post("/v1/auth/logout"), {}, {
             headers: {
-                [sessionTokenHeader]: sessionToken
+                [SESSION_TOKEN_HEADER]: sessionToken
             }
         }
     }

@@ -1,4 +1,4 @@
-import { sessionTokenHeader } from "@/types";
+import { SESSION_TOKEN_HEADER } from "@/types";
 import { axiosInstance } from "./axios-instance";
 
 export interface SetUpInterviewRequestBody {
@@ -6,13 +6,12 @@ export interface SetUpInterviewRequestBody {
     description: string
 }
 
-
 const interviewAPIs = {
     joinInterview: async (reqBody: SetUpInterviewRequestBody, sessionToken: string) => {
         try {
             axiosInstance.post("/v1/interview/set-up-interview", reqBody, {
                 headers: {
-                    [sessionTokenHeader]: sessionToken
+                    [SESSION_TOKEN_HEADER]: sessionToken
                 }
             })
                 .then((res) => {
@@ -23,17 +22,13 @@ const interviewAPIs = {
         }
     },
     interviewHistoryData: async (limit: number, offset: number, sessionToken: string) => {
-        try {
-            const response = await axiosInstance.get(`/v1/interview/history`, {
-                params: { limit, offset },
-                headers: {
-                    [sessionTokenHeader]: sessionToken
-                }
-            });
-            return response.data;
-        } catch (error) {
-            throw error;
-        }
+        const response = await axiosInstance.get(`/v1/interview/history`, {
+            params: { limit, offset },
+            headers: {
+                [SESSION_TOKEN_HEADER]: sessionToken
+            }
+        });
+        return response.data
     }
 }
 

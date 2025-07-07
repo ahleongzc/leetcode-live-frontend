@@ -1,32 +1,64 @@
-import { useEffect, useState } from "react"
 import interviewAPIs from "@/api/interview-api";
 import type { Interview } from "@/types";
 import { InterviewCard } from "@/components/interview-card"
+import { useQuery } from "@tanstack/react-query"
+import { storage } from "@/storage";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { LOCAL_STORAGE_SESSION_TOKEN_KEY } from "@/types";
 
 export default function HistoryPage() {
-    const [interviewHistory, setInterviewHistory] = useState([]);
+    const {
+        data: interviewHistory = [],
+        isLoading,
+        isError,
+        error
+    } = useQuery({
+        queryKey: ['interview-history'],
+        queryFn: async (): Promise<Interview[]> => {
+            const sessionToken = await storage.get(LOCAL_STORAGE_SESSION_TOKEN_KEY);
+            const responseBody = await interviewAPIs.interviewHistoryData(0, 0, sessionToken);
+            return responseBody.data.interviews;
+        },
+        staleTime: 5 * 60 * 1000,
+        refetchOnWindowFocus: false,
+        retry: false
+    })
 
-    useEffect(() => {
-        const fetchInterviewHistory = async () => {
-            const sessionToken = "KzBdVTAgcECmznosDBG6RI04C3qXkScNYuUxq_cHLyM";
-            try {
-                const responseBody = await interviewAPIs.interviewHistoryData(0, 0, sessionToken);
-                setInterviewHistory(responseBody.data.interviews); // Assuming `data.interviews` contains the array
-            } catch (err: any) {
-                console.error(err)
-            }
-        };
+    if (isLoading) {
+        return (
+            <div className="w-full h-full flex items-center justify-center">
+                <div>Loading interview history...</div>
+            </div>
+        )
+    }
 
-        fetchInterviewHistory();
-    }, []);
+    if (isError) {
+        return (
+            <div className="w-full h-full flex items-center justify-center">
+                <div className="text-red-500">
+                    Error loading history: {error?.message || "Something went wrong"}
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className="w-full h-full overflow-y-auto">
-            <ul className="">
-                {interviewHistory.map((interview: Interview, index: number) => (
-                    <InterviewCard key={interview.id} interview={interview} index={index + 1} />
-                ))}
-            </ul>
+            <ScrollArea className="h-full">
+                <div className="p-4">
+                    {interviewHistory.length === 0 ? (
+                        <div className="text-center text-gray-500 py-8">
+                            No interview history found
+                        </div>
+                    ) : (
+                        <ul className="space-y-2">
+                            {interviewHistory.map((interview: Interview, index: number) => (
+                                <InterviewCard key={interview.id} interview={interview} index={index + 1} />
+                            ))}
+                        </ul>
+                    )}
+                </div>
+            </ScrollArea>
         </div>
     )
 }

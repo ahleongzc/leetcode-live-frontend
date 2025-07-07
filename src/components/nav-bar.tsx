@@ -28,11 +28,6 @@ export function Navbar() {
                         <NavigationMenuLink>Home</NavigationMenuLink>
                     </Link>
                 </NavigationMenuItem>
-                <NavigationMenuItem>
-                    <Link to="/logout">
-                        <NavigationMenuLink>Login</NavigationMenuLink>
-                    </Link>
-                </NavigationMenuItem>
             </NavigationMenuList>
         </NavigationMenu>
     );
