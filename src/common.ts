@@ -1,6 +1,6 @@
 import { type Message } from "@/types"
 
-export function sendChromeMessage<T = any>(message: Message): Promise<T> {
+export function SendToServiceWorker<T = any>(message: Message): Promise<T> {
     return new Promise((resolve, reject) => {
         chrome.runtime.sendMessage(message, (response) => {
             if (chrome.runtime.lastError) {

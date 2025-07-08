@@ -1,44 +1,34 @@
 import { type Message } from "../types";
 
-const pendingResponses = new Map<number, (response: any) => void>();
-
-chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse) => {
-	(async () => {
-		switch (message.Type) {
-			case "setUpInterview":
-				chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-					if (tabs.length === 0 || tabs[0].id === undefined) return;
-
-					const msg: Message = {
-						Type: "setUpInterviewDOM",
-						SessionToken: "abc"
-					}
-
-					if (tabs[0].id) {
-						pendingResponses.set(tabs[0].id, sendResponse);
-					}
-
-					chrome.tabs.sendMessage(tabs[0].id as number, msg)
-				})
-				break
-			case "debug":
-				chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-					if (tabs.length === 0 || tabs[0].id === undefined) return;
-					chrome.tabs.sendMessage(tabs[0].id, message);
-				})
-				break
-			case "errorDOM":
-				if (sender.tab?.id && pendingResponses.has(sender.tab.id)) {
-					const pendingResponse = pendingResponses.get(sender.tab.id);
-					if (pendingResponse) {
-						pendingResponse({ error: message.error || "An error occurred in content script" });
-						pendingResponses.delete(sender.tab.id);
-					}
+chrome.runtime.onMessage.addListener((message: Message, _, sendResponse) => {
+	switch (message.Type) {
+		case "setUpInterview":
+			console.log("set up interview in service worker")
+			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+				const tabId = tabs[0].id;
+				if (tabId === undefined) {
+					sendResponse({ error: "unable to get tab id from service worker" })
+					return
 				}
-				break
-		}
-	})()
-
-	return true;
+				chrome.tabs.sendMessage(tabId, { Type: "setUpInterviewDOM" }, (response) => {
+					sendResponse(response)
+				})
+			})
+			return true
+		case "joinInterview":
+			console.log("join interview in service worker")
+			chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+				const tabId = tabs[0].id;
+				if (tabId === undefined) {
+					sendResponse({ error: "unable to get tab id from service worker" })
+					return
+				}
+				chrome.tabs.sendMessage(tabId, { Type: "joinInterviewDOM", InterviewToken: message.InterviewToken }, (response) => {
+					console.log(response)
+					sendResponse(response)
+				})
+			})
+			return true
+	}
 });
 

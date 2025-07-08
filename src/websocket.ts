@@ -43,24 +43,40 @@ class WebSocketSingleton {
         return this.socket;
     }
 
-    public connect(host: string, params?: Record<string, string>) {
-        const queryString = params ? `?${new URLSearchParams(params).toString()}` : "";
-        const urlWithParams = `${host}${queryString}`;
-        this.socket = new WebSocket(urlWithParams);
+    public connect(host: string, params?: Record<string, string>): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const queryString = params ? `?${new URLSearchParams(params).toString()}` : "";
+            const urlWithParams = `${host}${queryString}`;
 
-        this.socket.onclose = async (event) => {
-
-            console.log(event)
-        }
-
-        this.socket.onmessage = async (message) => {
-            try {
-                const data = JSON.parse(message.data)
-                await AudioPlayerSingleton.getInstance().play(data.url)
-            } catch (error) {
-                console.log(error)
+            if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+                reject(new Error("websocket already connected, close existing connection first"))
+                return
             }
-        }
+
+            try {
+                this.socket = new WebSocket(urlWithParams);
+            } catch (error) {
+                reject(new Error("join interview failed"));
+                return
+            }
+
+            this.socket.onerror = () => {
+                reject(new Error("join interview failed"));
+            };
+
+            this.socket.onopen = () => {
+                resolve();
+            }
+
+            this.socket.onmessage = async (message) => {
+                try {
+                    const data = JSON.parse(message.data)
+                    await AudioPlayerSingleton.getInstance().play(data.url)
+                } catch (error) {
+                    console.log(error)
+                }
+            }
+        })
     }
 }
 

@@ -21,7 +21,19 @@
     "extension_pages": "script-src 'self'; object-src 'self';"
   },
   "permissions": [
-    "storage"
+    "storage",
+    "scripting",
+    "activeTab"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "inject.js"
+      ],
+      "matches": [
+        "https://leetcode.com/*"
+      ]
+    }
   ],
   "content_scripts": [
     {

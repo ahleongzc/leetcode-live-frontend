@@ -1,98 +1,96 @@
-import type { SetUpInterviewRequestBody } from "@/api/interview-api";
 import type { Message, MessageReq } from "../types"
 import WebSocketSingleton from "../websocket";
 
 let recognition: null | SpeechRecognition = null
 
-chrome.runtime.onMessage.addListener((message: Message) => {
-    (async () => {
-        switch (message.Type) {
-            case "setUpInterviewDOM":
-                const meta = document.querySelector('meta[name="description"]');
-                const description = meta?.getAttribute('content') || "";
+export declare const monaco: any;
 
-                const ogTitleMeta = document.querySelector('meta[property="og:title"]');
-                const questionID = ogTitleMeta?.getAttribute('content') || "";
+function injectScript(filePath: string) {
+    const script = document.createElement("script");
+    script.src = chrome.runtime.getURL(filePath);
+    script.onload = () => script.remove();
+    (document.head || document.documentElement).appendChild(script);
+}
 
-                const req: SetUpInterviewRequestBody = {
-                    description: description,
-                    question_id: questionID,
-                }
+injectScript("inject.js");
 
-                if (!message.SessionToken) {
-                    return
-                }
+let latestEditorCode = "";
 
-                const response = await fetch("http://localhost:8000/v1/interview/set-up", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-Session-Token": message.SessionToken
-                    },
-                    body: JSON.stringify(req)
-                })
+window.addEventListener("message", (event) => {
+    if (event.source !== window) return;
+    if (event.data?.type === "RESPONSE_MONACO_CODE") {
+        latestEditorCode = event.data.code;
+    }
+});
 
-                if (response.status === 401) {
-                    chrome.runtime.sendMessage({
-                        Type: "unauthorized"
-                    });
-                    return;
-                }
+function requestEditorCode() {
+    window.postMessage({ type: "REQUEST_MONACO_CODE" }, "*");
+}
 
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => null)
-                    const errorMessage = errorData?.error || `Server error: ${response.status}`
-                    chrome.runtime.sendMessage({
-                        Type: "errorDOM",
-                        error: errorMessage
-                    });
-                    return;
-                }
+chrome.runtime.onMessage.addListener((message: Message, _, sendResponse) => {
+    switch (message.Type) {
+        case "setUpInterviewDOM":
+            console.log("set up successful")
+            const meta = document.querySelector('meta[name="description"]');
+            const description = meta?.getAttribute('content') || "";
 
-                const interviewToken = response.headers.get("X-Interview-Token");
-                if (interviewToken == undefined) {
-                    chrome.runtime.sendMessage({
-                        Type: "errorDOM",
-                        error: "please try again"
-                    });
-                    return
-                }
+            const ogTitleMeta = document.querySelector('meta[property="og:title"]');
+            const questionID = ogTitleMeta?.getAttribute('content') || "";
 
-                try {
-                    WebSocketSingleton.getInstance().connect("ws://localhost:8000/v1/interview/join", {
-                        token: interviewToken,
-                    });
-
-                    const socket = WebSocketSingleton.getInstance().getSocket();
-                    if (!socket) {
-                        throw new Error("Failed to get WebSocket instance");
-                    }
-
-                    // 7. Initialize speech recognition
-                    recognition = startSpeechRecognition(socket);
-                    if (recognition) {
-                        recognition.start();
-                        console.log("Speech recognition started");
-                    } else {
-                        console.warn("Speech recognition not supported");
-                    }
-                } catch (wsError) {
-                    console.error("WebSocket setup failed:", wsError);
-                }
-
-                console.log(req)
-                break
-            case "debug":
-                console.log(message)
-                break
-            default:
-                break
-        }
-    })()
-
+            sendResponse({
+                description: description,
+                questionID: questionID
+            })
+            return true
+        case "debug":
+            console.log(message)
+            return
+        case "joinInterviewDOM":
+            handleJoinInterview(message, sendResponse)
+            return true
+        default:
+            break
+    }
     return true
 });
 
+const handleJoinInterview = async (message: Message, sendResponse: (response?: any) => void) => {
+    const token = message.InterviewToken;
+    if (!token) {
+        sendResponse({ error: "No interview token provided" });
+        return;
+    }
+
+    try {
+        await WebSocketSingleton.getInstance().connect("ws://localhost:8000/v1/interview/join", {
+            token: token,
+        });
+
+        const socket = WebSocketSingleton.getInstance().getSocket();
+        if (!socket) {
+            throw new Error("Failed to get WebSocket instance");
+        }
+
+        recognition = startSpeechRecognition(socket);
+        if (recognition) {
+            recognition.start();
+            console.log("Speech recognition started");
+            sendResponse({
+                success: true,
+                message: "Interview joined and speech recognition started"
+            });
+        } else {
+            console.warn("Speech recognition not supported");
+            sendResponse({
+                error: "Speech recognition not supported in this browser"
+            });
+        }
+    } catch (wsError) {
+        sendResponse({
+            error: wsError instanceof Error ? wsError.message : "WebSocket connection failed"
+        });
+    }
+};
 
 // Start speech recognition and stream to WebSocket
 const startSpeechRecognition = (socket: WebSocket | null): SpeechRecognition | null => {
@@ -110,11 +108,14 @@ const startSpeechRecognition = (socket: WebSocket | null): SpeechRecognition | n
     recognition.lang = "en-US";
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
+        requestEditorCode()
         const chunk = event.results[event.results.length - 1][0].transcript;
+
         if (socket && socket.readyState === WebSocket.OPEN) {
             const payload: MessageReq = {
                 from: "client",
-                chunk: chunk
+                chunk: chunk,
+                code: latestEditorCode,
             }
             socket.send(JSON.stringify(payload));
             console.log(JSON.stringify(payload))

@@ -1,18 +1,26 @@
-export type Type = "storeSessionToken" | "debug" | "getSessionToken" | "setUpInterview" | "setUpInterviewDOM" | "errorDOM" | "unauthorized"
+export type Type = "setUpInterview" | "setUpInterviewDOM" | "joinInterview" | "joinInterviewDOM" | "debug"
 
 export const LOCAL_STORAGE_SESSION_TOKEN_KEY = "sessionToken"
 export const SESSION_TOKEN_HEADER = "x-session-token"
+export const INTERVIEW_TOKEN_HEADER = "x-interview-token"
 
 export interface Message {
     Type: Type
-    Content?: string
-    SessionToken?: string
-    error?: string
+    Description?: string
+    QuestionID?: string
+    InterviewToken?: string
+    Error?: string
+}
+
+export interface SetUpInterviewRequest {
+    question_id: string
+    description: string
 }
 
 export interface MessageReq {
     from: string
     chunk: string
+    code: string
 }
 
 export interface Interview {

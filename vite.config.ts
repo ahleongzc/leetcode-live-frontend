@@ -30,12 +30,13 @@ export default defineConfig({
         main: './index.html',
         content: './src/content_scripts/content.ts',
         'service-worker': './src/background/service-worker.ts',
+        'inject': './src/inject.ts',
       },
       output: {
         entryFileNames: (chunkInfo) => {
-          // Keep the original names for content script and service worker
           if (chunkInfo.name === 'content') return 'content.js';
           if (chunkInfo.name === 'service-worker') return 'service-worker.js';
+          if (chunkInfo.name === 'inject') return 'inject.js';
           return '[name]-[hash].js';
         },
       },
