@@ -39,6 +39,14 @@ const interviewAPIs = {
             }
         });
         return response.data
+    },
+    ongoingInterviewData: async (sessionToken: string) => {
+        const response = await axiosInstance.get(`/v1/interview/ongoing`, {
+            headers: {
+                [SESSION_TOKEN_HEADER]: sessionToken
+            }
+        });
+        return response.data
     }
 }
 

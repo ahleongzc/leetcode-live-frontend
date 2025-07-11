@@ -2,7 +2,7 @@ import interviewAPIs from "@/api/interview-api";
 import type { Interview } from "@/types";
 import { InterviewCard } from "@/components/interview-card"
 import { useQuery } from "@tanstack/react-query"
-import { storage } from "@/storage";
+import { storage } from "@/utils/storage";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function HistoryPage() {

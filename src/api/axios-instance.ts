@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { storage } from '@/storage';
+import { storage } from '@/utils/storage';
 import { toast } from 'sonner'
 import { LOCAL_STORAGE_SESSION_TOKEN_KEY } from '@/types';
 

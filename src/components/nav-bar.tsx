@@ -7,7 +7,7 @@ import {
     NavigationMenuList,
 } from "@/components/ui/navigation-menu"
 import { useMutation } from "@tanstack/react-query";
-import { storage } from "@/storage"
+import { storage } from "@/utils/storage"
 import authAPIs from "@/api/auth-api";
 import { toast } from "sonner";
 

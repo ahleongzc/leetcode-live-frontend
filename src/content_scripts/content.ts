@@ -54,7 +54,7 @@ chrome.runtime.onMessage.addListener((message: Message, _, sendResponse) => {
     return true
 });
 
-const handleJoinInterview = async (message: Message, sendResponse: (response?: any) => void) => {
+export const handleJoinInterview = async (message: Message, sendResponse: (response?: any) => void) => {
     const token = message.InterviewToken;
     if (!token) {
         sendResponse({ error: "No interview token provided" });

@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/sonner"
 import LoginPage from "./pages/login-page";
 import HomePage from './pages/home-page';
 import HistoryPage from './pages/history-page';
+import InterviewOngoingPage from './pages/interview-ongoing-page';
 import { Navbar } from './components/nav-bar';
 
 const queryClient = new QueryClient()
@@ -22,6 +23,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/ongoing" element={<InterviewOngoingPage />} />
             <Route path="/home" element={<HomePage />} />
             <Route path="/history" element={<HistoryPage />} />
           </Routes>

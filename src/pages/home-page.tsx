@@ -3,26 +3,44 @@ import type { Message } from "../types"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { storage } from "@/storage";
+import { storage } from "@/utils/storage";
 import interviewAPIs from "@/api/interview-api";
 import { INTERVIEW_TOKEN_HEADER } from "@/types";
+import { messaging } from "@/utils/messaging";
+import { useNavigate } from "react-router-dom";
 
 
 export default function HomePage() {
-
+    const navigate = useNavigate()
     const queryClient = useQueryClient();
 
     const {
-        data: interview = null,
-        isLoading,
-        isError,
-        error
+        data: ongoingInterview = null,
+        isLoading: isOngoingInterviewLoading,
+        isError: isOngoingInterviewError,
+        error: ongoingInterviewError,
+    } = useQuery({
+        queryKey: ["ongoingInterview"],
+        queryFn: async () => {
+            const sessionToken = await storage.getSessionToken();
+            const responseBody = await interviewAPIs.ongoingInterviewData(sessionToken);
+            return responseBody.data.interview
+        },
+        refetchOnMount: true,
+        retry: 3,
+    });
+
+    const {
+        data: unfinishedInterview = null,
+        isLoading: isUnfinishedInterviewLoading,
+        isError: isUnfinishedInterviewError,
+        error: unfinishedInterviewError,
     } = useQuery({
         queryKey: ["unfinishedInterview"],
         queryFn: async (): Promise<Interview> => {
             const sessionToken = await storage.getSessionToken()
             const responseBody = await interviewAPIs.unfinishedInterviewData(sessionToken)
-            return responseBody.interview
+            return responseBody.data.interview
         },
         refetchOnMount: true,
         retry: 3
@@ -61,20 +79,7 @@ export default function HomePage() {
 
     const startInterviewMutation = useMutation({
         mutationFn: async () => {
-            const pageData: any = await new Promise((resolve, reject) => {
-                chrome.runtime.sendMessage({
-                    Type: "setUpInterview"
-                }, (response) => {
-                    if (chrome.runtime.lastError) {
-                        reject(new Error(chrome.runtime.lastError.message));
-                    } else if (response?.error) {
-                        reject(new Error(response.error));
-                    } else {
-                        resolve(response);
-                    }
-                });
-            });
-
+            const pageData: any = await messaging.sendMessage({ Type: "setUpInterview" })
             const sessionToken = await storage.getSessionToken();
             const reqBody = {
                 question_id: pageData.questionID,
@@ -83,19 +88,9 @@ export default function HomePage() {
 
             const resp = await interviewAPIs.setUpNewInterview(reqBody, sessionToken);
 
-            await new Promise((resolve, reject) => {
-                chrome.runtime.sendMessage({
-                    Type: "joinInterview",
-                    InterviewToken: resp.headers[INTERVIEW_TOKEN_HEADER]
-                }, (response) => {
-                    if (chrome.runtime.lastError) {
-                        reject(new Error(chrome.runtime.lastError.message));
-                    } else if (response?.error) {
-                        reject(new Error(response.error));
-                    } else {
-                        resolve(response);
-                    }
-                });
+            await messaging.sendMessage({
+                Type: "joinInterview",
+                InterviewToken: resp.headers[INTERVIEW_TOKEN_HEADER]
             })
         },
         onSuccess: () => {
@@ -125,7 +120,7 @@ export default function HomePage() {
         abandonUnfinishedInterviewMutation.mutate()
     }
 
-    if (isLoading) {
+    if (isOngoingInterviewLoading || isUnfinishedInterviewLoading) {
         return (
             <div className="flex flex-col items-center justify-center h-full w-full">
                 <div>Loading...</div>
@@ -133,14 +128,19 @@ export default function HomePage() {
         )
     }
 
-    if (isError) {
+    if (isOngoingInterviewError || isUnfinishedInterviewError) {
         return (
             <div className="flex flex-col items-center justify-center h-full w-full">
                 <div className="text-red-500 text-center">
-                    Error loading interview status: {error?.message || "Something went wrong"}
+                    Error loading interview status: {unfinishedInterviewError?.message || "Something went wrong"}
+                    Error loading interview status: {ongoingInterviewError?.message || "Something went wrong"}
                 </div>
             </div>
         )
+    }
+
+    if (ongoingInterview) {
+        navigate("/ongoing")
     }
 
     return (
@@ -153,14 +153,14 @@ export default function HomePage() {
                 DEBUG
             </Button>
 
-            {interview ? (
+            {unfinishedInterview ? (
                 // Show ongoing interview info and join button
                 <div className="text-center space-y-2">
                     <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                         <h3 className="font-semibold text-blue-800">Unfinished Interview</h3>
-                        <p className="text-sm text-blue-600">{interview.question}</p>
+                        <p className="text-sm text-blue-600">{unfinishedInterview.question}</p>
                         <p className="text-xs text-blue-500">
-                            Started: {new Date(interview.start_timestamp_s * 1000).toLocaleString()}
+                            Started: {new Date(unfinishedInterview.start_timestamp_s * 1000).toLocaleString()}
                         </p>
                     </div>
                     <Button

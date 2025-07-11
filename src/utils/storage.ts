@@ -1,4 +1,4 @@
-import { LOCAL_STORAGE_SESSION_TOKEN_KEY } from './types'
+import { LOCAL_STORAGE_SESSION_TOKEN_KEY } from '../types'
 import { toast } from 'sonner'
 
 export const storage = {

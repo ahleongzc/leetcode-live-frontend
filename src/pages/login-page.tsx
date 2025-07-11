@@ -6,7 +6,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
-import { storage } from "@/storage"
+import { storage } from "@/utils/storage"
 import {
     CardContent,
     CardHeader,
