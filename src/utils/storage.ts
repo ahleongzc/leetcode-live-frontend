@@ -1,5 +1,4 @@
 import { LOCAL_STORAGE_SESSION_TOKEN_KEY } from '../types'
-import { toast } from 'sonner'
 
 export const storage = {
     async set(key: string, value: string): Promise<void> {
@@ -30,15 +29,8 @@ export const storage = {
     async getSessionToken(): Promise<string> {
         const sessionToken = await this.get(LOCAL_STORAGE_SESSION_TOKEN_KEY);
         if (!sessionToken) {
-            toast("Session expired", {
-                description: "Please login to continue",
-            });
-
-            if (typeof window !== 'undefined') {
-                window.location.hash = '#/login';
-            }
-
-            throw new Error("No session token found - redirected to login");
+            window.location.hash = '#/login';
+            throw new Error("Session expired")
         }
 
         return sessionToken;

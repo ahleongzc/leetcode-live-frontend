@@ -10,12 +10,12 @@ import { storage } from "@/utils/storage"
 import {
     CardContent,
     CardHeader,
-    CardTitle,
 } from "@/components/ui/card"
 import { SESSION_TOKEN_HEADER, LOCAL_STORAGE_SESSION_TOKEN_KEY } from "@/types"
 import { Input } from "@/components/ui/input"
 import { useEffect } from "react"
 import { DEFAULT_PAGE_WIDTH, DEFAULT_PAGE_HEIGHT } from '@/types'
+import BlurText from "@/components/blur-text";
 
 export default function LoginPage({ onResize }: { onResize: (width: number, height: number) => void }) {
     const navigate = useNavigate()
@@ -43,6 +43,17 @@ export default function LoginPage({ onResize }: { onResize: (width: number, heig
     })
 
     useEffect(() => {
+        const sessionToken = storage.getSessionToken()
+        if (!sessionToken) {
+            toast("Session expired", {
+                description: "Please log in to continue",
+                action: {
+                    label: "OK",
+                    onClick: () => { },
+                },
+            })
+        }
+
         const resize = () => {
             onResize(DEFAULT_PAGE_WIDTH, DEFAULT_PAGE_HEIGHT)
         }
@@ -58,7 +69,13 @@ export default function LoginPage({ onResize }: { onResize: (width: number, heig
     return (
         <div className="flex flex-col items-center justify-center h-full w-full">
             <CardHeader className="w-full space-y-4">
-                <CardTitle>Login</CardTitle>
+                <BlurText
+                    text="Leetcode Live"
+                    delay={150}
+                    animateBy="words"
+                    direction="top"
+                    className="text-3xl font-bold my-1"
+                />
             </CardHeader>
             <CardContent className="w-full">
                 <form onSubmit={handleSubmit} className="space-y-4">

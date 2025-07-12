@@ -1,9 +1,9 @@
 import { Mic } from 'lucide-react';
 
-const RecordingIndicator = () => {
+const RecordingIndicator = ({ size }: { size: number }) => {
     return (
         <div className="flex items-center text-sm font-medium text-red-600">
-            <Mic className="w-4 h-4 mr-2 animate-blink" />
+            <Mic className={`mr-2 animate-blink`} style={{ width: size, height: size }} />
         </div>
     );
 };

@@ -11,8 +11,10 @@ import LoginPage from "./pages/login-page";
 import HomePage from './pages/home-page';
 import HistoryPage from './pages/history-page';
 import InterviewOngoingPage from './pages/interview-ongoing-page';
-import DockBar from './components/dock';
+import DockBar from './components/dock-bar';
 import './App.css';
+import ErrorPage from './pages/error-page'
+import NotFoundPage from './pages/not-found-page'
 
 const queryClient = new QueryClient()
 
@@ -41,7 +43,7 @@ function App() {
     setHeight(newHeight);
   };
 
-  const hideDockBarRoutes = ["/login", "/ongoing"];
+  const hideDockBarRoutes = ["/login", "/ongoing", "/error", "*"];
   const shouldShowDockBar = !hideDockBarRoutes.includes(location.pathname);
 
   return (
@@ -57,6 +59,8 @@ function App() {
           <Route path="/ongoing" element={<InterviewOngoingPage onResize={handleResize} />} />
           <Route path="/home" element={<HomePage onResize={handleResize} />} />
           <Route path="/history" element={<HistoryPage onResize={handleResize} />} />
+          <Route path="/error" element={<ErrorPage onResize={handleResize} />} />
+          <Route path="*" element={<NotFoundPage onResize={handleResize} />} />
         </Routes>
         {shouldShowDockBar && <DockBar />}
       </div >

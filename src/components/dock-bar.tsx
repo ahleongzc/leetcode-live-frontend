@@ -215,7 +215,7 @@ function Dock({
 
 const items = [
     { icon: <House size={18} />, label: "Home", path: "/home" },
-    { icon: <Archive size={18} />, label: "Archive", path: "/history" },
+    { icon: <Archive size={18} />, label: "History", path: "/history" },
     { icon: <CircleUserRound size={18} />, label: "Profile", path: "/profile" },
     { icon: <Cog size={18} />, label: "Settings", path: "/settings" },
 ];

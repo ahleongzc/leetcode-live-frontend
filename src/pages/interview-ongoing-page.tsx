@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { ONGOING_PAGE_HEIGHT, ONGOING_PAGE_WIDTH } from "@/types";
 import RecordingIndicator from "@/components/recording-indicator";
+import BlurText from "@/components/blur-text";
 
 export default function InterviewOngoingPage({ onResize }: { onResize: (width: number, height: number) => void }) {
     const navigate = useNavigate()
@@ -32,26 +33,24 @@ export default function InterviewOngoingPage({ onResize }: { onResize: (width: n
         }
     }, []);
 
-    const handleClosePopup = () => {
-        window.close();
-    }
-
     return (
         <div className="flex flex-col items-center justify-center h-full w-full bg-gray-100 p-6">
-            <RecordingIndicator />
-            <div className="mt-6 space-y-4">
-                <button
-                    className="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600 transition"
-                    onClick={handleClosePopup}
-                >
-                    Close Popup
-                </button>
-                <button
-                    className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition"
-                    onClick={() => { }}
-                >
-                    View Response
-                </button>
+            <div className="flex flex-row">
+                <RecordingIndicator size={24} />
+                <BlurText
+                    text="Interview is ongoing..."
+                    delay={150}
+                    animateBy="words"
+                    direction="top"
+                    className="text-xl font-semibold"
+                />
+            </div>
+            <div
+                className="mt-2"
+            >
+                <a className="text-gray-400">
+                    You can close the extension now, good luck!
+                </a>
             </div>
         </div>
     )

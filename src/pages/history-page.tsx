@@ -20,7 +20,7 @@ export default function HistoryPage({ onResize }: { onResize: (width: number, he
         isError,
         error
     } = useQuery({
-        queryKey: ['interviewHistory'],
+        queryKey: ["interviewHistory", "all"],
         queryFn: async (): Promise<Interview[]> => {
             const sessionToken = await storage.getSessionToken()
             const responseBody = await interviewAPIs.interviewHistoryData(0, 0, sessionToken);

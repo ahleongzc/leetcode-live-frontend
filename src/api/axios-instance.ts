@@ -18,15 +18,24 @@ axiosInstance.interceptors.response.use(
     async (error) => {
         if (error.response?.status === 401) {
             await storage.remove(LOCAL_STORAGE_SESSION_TOKEN_KEY)
-            toast("Unauthorized", {
-                description: "Please login again",
+            window.location.hash = '#/login';
+        }
+
+        if (error.response?.status === 500) {
+            window.location.hash = '#/error';
+        }
+
+        if (error.message === "Network Error" || error.code === "ERR_NETWORK") {
+            toast("Network Error", {
+                description: "Unable to connect to the server. Please try again later.",
                 action: {
                     label: "OK",
                     onClick: () => { },
                 },
             });
-            window.location.hash = '#/login';
+            window.location.hash = '#/error';
         }
+
         return Promise.reject(error);
     }
 );
