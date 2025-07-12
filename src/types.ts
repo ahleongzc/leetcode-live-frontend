@@ -1,4 +1,8 @@
-export type Type = "setUpInterview" | "setUpInterviewDOM" | "joinInterview" | "joinInterviewDOM" | "debug"
+export type Type =
+    "setUpInterview" | "setUpInterviewDOM" |
+    "joinInterview" | "joinInterviewDOM" |
+    "endInterview" | "endInterviewDOM" |
+    "debug"
 
 export const LOCAL_STORAGE_SESSION_TOKEN_KEY = "sessionToken"
 export const SESSION_TOKEN_HEADER = "x-session-token"
@@ -10,6 +14,7 @@ export interface Message {
     QuestionID?: string
     InterviewToken?: string
     Error?: string
+    End?: boolean
 }
 
 export interface SetUpInterviewRequest {

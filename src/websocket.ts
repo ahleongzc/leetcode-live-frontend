@@ -64,6 +64,12 @@ class WebSocketSingleton {
                 reject(new Error("join interview failed"));
             };
 
+            this.socket.onclose = () => {
+                chrome.runtime.sendMessage({
+                    Type: "endInterviewDOM"
+                })
+            }
+
             this.socket.onopen = () => {
                 resolve();
             }

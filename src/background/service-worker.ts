@@ -29,6 +29,11 @@ chrome.runtime.onMessage.addListener((message: Message, _, sendResponse) => {
 				})
 			})
 			return true
+		case "endInterviewDOM":
+			chrome.runtime.sendMessage({
+				Type: "endInterview"
+			})
+			return
 	}
 });
 

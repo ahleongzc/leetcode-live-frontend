@@ -94,6 +94,7 @@ export default function HomePage() {
             })
         },
         onSuccess: () => {
+            navigate("/ongoing")
             toast("Interview Started", {
                 description: "Your interview has been set up successfully",
             });
