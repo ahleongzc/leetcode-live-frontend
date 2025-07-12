@@ -5,12 +5,22 @@ import { toast } from "sonner"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { storage } from "@/utils/storage";
 import interviewAPIs from "@/api/interview-api";
-import { INTERVIEW_TOKEN_HEADER } from "@/types";
+import { DEFAULT_PAGE_HEIGHT, DEFAULT_PAGE_WIDTH, INTERVIEW_TOKEN_HEADER } from "@/types";
 import { messaging } from "@/utils/messaging";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 
-export default function HomePage() {
+export default function HomePage(
+    { onResize }: { onResize: (width: number, height: number) => void }
+) {
+    useEffect(() => {
+        const resize = () => {
+            onResize(DEFAULT_PAGE_WIDTH, DEFAULT_PAGE_HEIGHT)
+        }
+        resize()
+    }, [])
+
     const navigate = useNavigate()
     const queryClient = useQueryClient();
 
@@ -143,6 +153,7 @@ export default function HomePage() {
     if (ongoingInterview) {
         navigate("/ongoing")
     }
+
 
     return (
         <div className="flex flex-col items-center justify-center h-full w-full">

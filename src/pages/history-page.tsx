@@ -1,11 +1,19 @@
 import interviewAPIs from "@/api/interview-api";
-import type { Interview } from "@/types";
+import { HISTORY_PAGE_HEIGHT, HISTORY_PAGE_WIDTH, type Interview } from "@/types";
 import { InterviewCard } from "@/components/interview-card"
 import { useQuery } from "@tanstack/react-query"
 import { storage } from "@/utils/storage";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useEffect } from "react";
 
-export default function HistoryPage() {
+export default function HistoryPage({ onResize }: { onResize: (width: number, height: number) => void }) {
+    useEffect(() => {
+        const resize = () => {
+            onResize(HISTORY_PAGE_WIDTH, HISTORY_PAGE_HEIGHT)
+        }
+        resize()
+    }, [])
+
     const {
         data: interviewHistory = [],
         isLoading,
@@ -43,7 +51,7 @@ export default function HistoryPage() {
     }
 
     return (
-        <div className="w-full h-full overflow-y-auto">
+        <div className="w-full h-full overflow-y-visible">
             <ScrollArea className="h-full">
                 <div className="p-4">
                     {interviewHistory.length === 0 ? (

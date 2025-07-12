@@ -23,6 +23,10 @@ window.addEventListener("message", (event) => {
     }
 });
 
+window.addEventListener('beforeunload', () => {
+    chrome.runtime.sendMessage({ Type: "refreshDOM" });
+});
+
 function requestEditorCode() {
     window.postMessage({ type: "REQUEST_MONACO_CODE" }, "*");
 }

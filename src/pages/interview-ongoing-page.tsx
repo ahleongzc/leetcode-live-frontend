@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { ONGOING_PAGE_HEIGHT, ONGOING_PAGE_WIDTH } from "@/types";
+import RecordingIndicator from "@/components/recording-indicator";
 
 export default function InterviewOngoingPage({ onResize }: { onResize: (width: number, height: number) => void }) {
     const navigate = useNavigate()
@@ -19,6 +21,11 @@ export default function InterviewOngoingPage({ onResize }: { onResize: (width: n
                 chrome.runtime.onMessage.removeListener(listener);
             };
         }
+
+        const resize = () => {
+            onResize(ONGOING_PAGE_WIDTH, ONGOING_PAGE_HEIGHT)
+        }
+        resize()
     }, [navigate]);
 
     const handleClosePopup = () => {
@@ -26,19 +33,13 @@ export default function InterviewOngoingPage({ onResize }: { onResize: (width: n
     }
 
     return (
-        <div className="flex flex-col items-center justify-center h-full w-full">
-            <div>ongoing broo</div>
+        <div className="flex flex-row items-center justify-center h-full w-full">
+            <RecordingIndicator />
             <button
-                className="bg-blue-500 text-white px-4 py-2 rounded mt-4 hover:bg-blue-600"
-                onClick={() => onResize(200, 300)}
-            >
-                Resize to 800x600
-            </button>
-            <button
-                className="bg-green-500 text-white px-4 py-2 rounded mt-4 hover:bg-green-600"
+                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
                 onClick={handleClosePopup}
             >
-                Close 
+                Close
             </button>
         </div>
     )

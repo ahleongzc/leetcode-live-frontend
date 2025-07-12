@@ -14,8 +14,10 @@ import {
 } from "@/components/ui/card"
 import { SESSION_TOKEN_HEADER, LOCAL_STORAGE_SESSION_TOKEN_KEY } from "@/types"
 import { Input } from "@/components/ui/input"
+import { useEffect } from "react"
+import { DEFAULT_PAGE_WIDTH, DEFAULT_PAGE_HEIGHT } from '@/types'
 
-export default function LoginPage() {
+export default function LoginPage({ onResize }: { onResize: (width: number, height: number) => void }) {
     const navigate = useNavigate()
 
     const [email, setEmail] = useState<string>("123@gmail.com")
@@ -39,6 +41,14 @@ export default function LoginPage() {
             })
         }
     })
+
+    useEffect(() => {
+        const resize = () => {
+            onResize(DEFAULT_PAGE_WIDTH, DEFAULT_PAGE_HEIGHT)
+        }
+        resize()
+    }, [])
+
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()

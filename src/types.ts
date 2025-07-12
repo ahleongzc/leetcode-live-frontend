@@ -2,11 +2,21 @@ export type Type =
     "setUpInterview" | "setUpInterviewDOM" |
     "joinInterview" | "joinInterviewDOM" |
     "endInterview" | "endInterviewDOM" |
+    "refresh" | "refreshDOM" |
     "debug"
 
 export const LOCAL_STORAGE_SESSION_TOKEN_KEY = "sessionToken"
 export const SESSION_TOKEN_HEADER = "x-session-token"
 export const INTERVIEW_TOKEN_HEADER = "x-interview-token"
+
+export const DEFAULT_PAGE_HEIGHT = 500
+export const DEFAULT_PAGE_WIDTH = 400
+
+export const HISTORY_PAGE_HEIGHT = 700
+export const HISTORY_PAGE_WIDTH = 600
+
+export const ONGOING_PAGE_HEIGHT = 100
+export const ONGOING_PAGE_WIDTH = 400
 
 export interface Message {
     Type: Type

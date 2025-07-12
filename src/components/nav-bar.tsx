@@ -35,7 +35,7 @@ export function Navbar() {
     };
 
     return (
-        <NavigationMenu>
+        <NavigationMenu className="flex w-full bg-white h-100px">
             <NavigationMenuList>
                 <NavigationMenuLink
                     className="cursor-pointer"
