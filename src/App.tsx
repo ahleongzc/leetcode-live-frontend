@@ -11,7 +11,7 @@ import LoginPage from "./pages/login-page";
 import HomePage from './pages/home-page';
 import HistoryPage from './pages/history-page';
 import InterviewOngoingPage from './pages/interview-ongoing-page';
-import { Navbar } from './components/nav-bar';
+import DockBar from './components/dock';
 import './App.css';
 
 const queryClient = new QueryClient()
@@ -19,17 +19,17 @@ const queryClient = new QueryClient()
 function App() {
 
   useEffect(() => {
-    const handler = (message: any) => {
-      if (message?.Type === "refresh") {
-        window.close();
-      }
+    if (typeof chrome !== 'undefined' && chrome.runtime) {
+      const handler = (message: any) => {
+        if (message?.Type === "refresh") {
+          window.close();
+        }
+      };
+      chrome.runtime.onMessage.addListener(handler);
+      return () => {
+        chrome.runtime.onMessage.removeListener(handler);
+      };
     };
-
-    chrome.runtime.onMessage.addListener(handler);
-    return () => {
-      chrome.runtime.onMessage.removeListener(handler);
-    };
-
   }, []);
 
   const location = useLocation();
@@ -41,16 +41,15 @@ function App() {
     setHeight(newHeight);
   };
 
-  const hideNavbarRoutes = ["/login", "/ongoing"];
-  const shouldShowNavbar = !hideNavbarRoutes.includes(location.pathname);
+  const hideDockBarRoutes = ["/login", "/ongoing"];
+  const shouldShowDockBar = !hideDockBarRoutes.includes(location.pathname);
 
   return (
     <QueryClientProvider client={queryClient}>
       <div
-        className="bg-white overflow-y-visible flex flex-col"
+        className="bg-white overflow-y-visible flex flex-col relative"
         style={{ width: `${width}px`, height: `${height}px` }}
       >
-        {shouldShowNavbar && <Navbar />}
         <Toaster position='top-center' theme='dark' richColors />
         <Routes>
           <Route path="/" element={<HomePage onResize={handleResize} />} />
@@ -59,6 +58,7 @@ function App() {
           <Route path="/home" element={<HomePage onResize={handleResize} />} />
           <Route path="/history" element={<HistoryPage onResize={handleResize} />} />
         </Routes>
+        {shouldShowDockBar && <DockBar />}
       </div >
       <ReactQueryDevtools />
     </QueryClientProvider>

@@ -51,7 +51,7 @@ export default function HistoryPage({ onResize }: { onResize: (width: number, he
     }
 
     return (
-        <div className="w-full h-full overflow-y-visible">
+        <div className="w-full h-full overflow-y-">
             <ScrollArea className="h-full">
                 <div className="p-4">
                     {interviewHistory.length === 0 ? (

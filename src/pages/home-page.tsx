@@ -1,5 +1,4 @@
 import type { Interview } from "@/types";
-import type { Message } from "../types"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -9,6 +8,7 @@ import { DEFAULT_PAGE_HEIGHT, DEFAULT_PAGE_WIDTH, INTERVIEW_TOKEN_HEADER } from 
 import { messaging } from "@/utils/messaging";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import SplitText from "@/components/split-text"
 
 
 export default function HomePage(
@@ -55,15 +55,6 @@ export default function HomePage(
         refetchOnMount: true,
         retry: 3
     })
-
-    const handleDebug = (e: React.FormEvent) => {
-        e.preventDefault()
-        const debug: Message = {
-            Type: "debug"
-        }
-
-        chrome.runtime.sendMessage(debug)
-    }
 
     const abandonUnfinishedInterviewMutation = useMutation({
         mutationFn: async () => {
@@ -157,13 +148,19 @@ export default function HomePage(
 
     return (
         <div className="flex flex-col items-center justify-center h-full w-full">
-            <Button
-                type="submit"
-                className="bg-white w-full max-w-sm mx-auto transform transition-transform duration-200 active:scale-95 hover:bg-gray-200"
-                onClick={handleDebug}
-            >
-                DEBUG
-            </Button>
+            <SplitText
+                text="Welcome back!"
+                className="absolute top-4 left-4 text-3xl font-bold"
+                delay={100}
+                duration={0.6}
+                ease="power3.out"
+                splitType="chars"
+                from={{ opacity: 0, y: 40 }}
+                to={{ opacity: 1, y: 0 }}
+                threshold={0.1}
+                rootMargin="-100px"
+                textAlign="left"
+            />
 
             {unfinishedInterview ? (
                 // Show ongoing interview info and join button
