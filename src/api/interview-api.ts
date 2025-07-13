@@ -8,6 +8,14 @@ export interface SetUpInterviewRequestBody {
 }
 
 const interviewAPIs = {
+    setUpUnfinishedInterview: async (sessionToken: string): Promise<AxiosResponse> => {
+        const response = await axiosInstance.post("/v1/interview/set-up-unfinished", {}, {
+            headers: {
+                [SESSION_TOKEN_HEADER]: sessionToken
+            }
+        })
+        return response
+    },
     setUpNewInterview: async (reqBody: SetUpInterviewRequestBody, sessionToken: string): Promise<AxiosResponse> => {
         const response = await axiosInstance.post("/v1/interview/set-up-new", reqBody, {
             headers: {

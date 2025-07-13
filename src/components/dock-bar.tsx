@@ -152,7 +152,7 @@ function DockIcon({ children, className = "" }: DockIconProps) {
     );
 }
 
-function Dock({
+export function Dock({
     items,
     className = "",
     spring = { mass: 0.1, stiffness: 150, damping: 12 },

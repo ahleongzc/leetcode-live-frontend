@@ -109,6 +109,34 @@ export default function HomePage(
         }
     });
 
+    const rejoinInterviewMutation = useMutation({
+        mutationFn: async () => {
+            const sessionToken = await storage.getSessionToken();
+            const resp = await interviewAPIs.setUpUnfinishedInterview(sessionToken)
+
+            console.log("REACH HERE")
+
+            await messaging.sendMessage({
+                Type: "joinInterview",
+                InterviewToken: resp.headers[INTERVIEW_TOKEN_HEADER]
+            })
+        },
+        onSuccess: () => {
+            navigate("/ongoing")
+            queryClient.invalidateQueries({ queryKey: ["unfinishedInterview"] });
+        },
+        onError: (error: any) => {
+            toast("Failed to Start Interview", {
+                description: error.message || "Something went wrong, please try again",
+                action: {
+                    label: "OK",
+                    onClick: () => { },
+                },
+            })
+        }
+    })
+
+
     useEffect(() => {
         const resize = () => {
             onResize(DEFAULT_PAGE_WIDTH, DEFAULT_PAGE_HEIGHT)
@@ -123,6 +151,11 @@ export default function HomePage(
     const handleStartInterview = async (e: React.FormEvent) => {
         e.preventDefault()
         startInterviewMutation.mutate()
+    }
+
+    const handleRejoinInterview = async (e: React.FormEvent) => {
+        e.preventDefault()
+        rejoinInterviewMutation.mutate()
     }
 
     const handleAbandonInterview = async (e: React.FormEvent) => {
@@ -200,8 +233,9 @@ export default function HomePage(
                     <Button
                         type="submit"
                         className="bg-blue-600 hover:bg-blue-700 text-white w-full max-w-sm mx-auto transform transition-transform duration-200 active:scale-95"
+                        onClick={handleRejoinInterview}
                     >
-                        Join
+                        Re-join
                     </Button>
 
                     <Button

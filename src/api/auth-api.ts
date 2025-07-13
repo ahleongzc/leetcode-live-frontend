@@ -13,13 +13,6 @@ const authAPIs = {
             password: password
         })
     },
-    authStatus: async (sessionToken: string) => {
-        return await axiosInstance.post("/v1/auth/status", {}, {
-            headers: {
-                [SESSION_TOKEN_HEADER]: sessionToken
-            }
-        })
-    },
     logout: async (sessionToken: string) => {
         return await axiosInstance.post("/v1/auth/logout", {}, {  // Fixed: removed extra ),
             headers: {

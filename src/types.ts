@@ -36,6 +36,7 @@ export interface MessageReq {
     from: string
     chunk: string
     code: string
+    end?: boolean
 }
 
 export interface Interview {
@@ -49,3 +50,9 @@ export interface Interview {
     end_timestamp_s: number | null;
 }
 
+export interface UserProfile {
+    username: string;
+    email: string;
+    remaining_interview_count: number,
+    interview_duration_s: number
+}
